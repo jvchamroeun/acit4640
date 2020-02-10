@@ -5,10 +5,10 @@ VM_USER=todoapp
 #install required packages
 install_packages () {
 	echo "Packages downloading now . . ."
-	ssh $VM_USER 'echo y | sudo yum install git'
+	ssh $VM_USER 'sudo yum install git -y'
 	ssh $VM_USER 'curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -'
-        ssh $VM_USER 'echo y | sudo yum install nodejs'
-	ssh $VM_USER 'echo y | sudo yum install mongodb-server'
+    ssh $VM_USER 'sudo yum install nodejs -y'
+	ssh $VM_USER 'sudo yum install mongodb-server -y'
 	echo "Enabling and Starting mongod now . . ."
 	ssh $VM_USER 'sudo systemctl enable mongod && sudo systemctl start mongod'
 }
@@ -38,7 +38,7 @@ install_app () {
 #install nginx and modifying nginx.conf
 production_setup () {
 	echo "Running nginx service now . . ."
-	ssh $VM_USER 'echo y | sudo yum install nginx'
+	ssh $VM_USER 'sudo yum install nginx -y'
 	ssh $VM_USER 'sudo systemctl enable nginx; sudo systemctl start nginx'
 	echo "Transfering nginx configuration now . . ."
 	ssh $VM_USER 'sudo rm /etc/nginx/nginx.conf'
