@@ -27,14 +27,15 @@ create_network () {
 
 create_vm () {
     vbmg createvm --name "$VM_NAME" --ostype "RedHat_64" --register
-    vbmg modifyvm "$VM_NAME" --memory 1024 --cableconnected1 on --nic1 natnetwork \
-    			     --nat-network1 "$NET_NAME" --audio none --boot1 disk --boot2 net --boot3 none
+    vbmg modifyvm "$VM_NAME" --memory 1512 --vram 16 --nic1 natnetwork \
+    			     --nat-network1 "$NET_NAME" --audio none \
+                     --boot1 disk --boot2 net --boot3 none --boot4 none
 
     SED_PROGRAM="/^Config file:/ { s/^.*:\s\+\(\S\+\)/\1/; s|\\\\|/|gp }"
     VBOX_FILE=$(vbmg showvminfo "$VM_NAME" | sed -ne "$SED_PROGRAM")
     VM_DIR=$(dirname "$VBOX_FILE")
 
-    vbmg createmedium disk --filename "$VM_DIR"'/'"$FILE".vdi --size 10000
+    vbmg createmedium disk --filename "$VM_DIR"'/'"$FILE".vdi --size 10240
 
     vbmg storagectl "$VM_NAME" --name "IDE" --add ide
     vbmg storagectl "$VM_NAME" --name "SATA" --add sata

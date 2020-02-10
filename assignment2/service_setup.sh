@@ -13,7 +13,7 @@ initial_setup () {
 #sets up pxe server and transfer requried files
 initialize_pxe_server () {
 	vbmg modifyvm "$PXE" --nat-network1 "$NET_NAME"
-	vbmg startvm
+	vbmg startvm "$PXE"
 
 	while /bin/true; do
         ssh -i ~/.ssh/acit_admin_id_rsa -p 12222 \
