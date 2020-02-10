@@ -7,7 +7,7 @@ install_packages () {
 	echo "Packages downloading now . . ."
 	ssh $VM_USER 'sudo yum install git -y'
 	ssh $VM_USER 'curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -'
-    ssh $VM_USER 'sudo yum install nodejs -y'
+        ssh $VM_USER 'sudo yum install nodejs -y'
 	ssh $VM_USER 'sudo yum install mongodb-server -y'
 	echo "Enabling and Starting mongod now . . ."
 	ssh $VM_USER 'sudo systemctl enable mongod && sudo systemctl start mongod'
