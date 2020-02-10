@@ -44,6 +44,7 @@ production_setup () {
 	ssh $VM_USER 'sudo rm /etc/nginx/nginx.conf'
 	scp ./setup/nginx.conf todoapp:/home/admin
 	ssh $VM_USER 'sudo mv nginx.conf /etc/nginx'
+	ssh $VM_USER 'sudo yum install psmisc -y; sudo fuser -k 80/tcp'
 	ssh $VM_USER 'sudo systemctl restart nginx'
 
 }
