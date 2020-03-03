@@ -9,35 +9,23 @@
       selinux:
         policy: targeted
         state: permissive
-    - name: copy the "database.js" file
-      copy:
-        src: files/database.js
-        dest: /home/{{ admin_user_name }}/database.js
-        owner: "{{ admin_user_name }}"
-        mode: "0755"
-    - name: copy the "nginx.conf" file
-      copy:
-        src: files/nginx.conf
-        dest: /home/{{ admin_user_name }}/nginx.conf
-        owner: "{{ admin_user_name }}"
-        mode: "0755"
-    - name: copy the "todoapp.service" file
-      copy:
-        src: files/todoapp.service
-        dest: /home/{{ admin_user_name }}/todoapp.service
-        owner: "{{ admin_user_name }}"
-        mode: "0755"
-    - name: copy the "mongodb_ACIT4640.tgz" file
+    - name: install required packages for todoapp
+      become: yes
+      package:
+        name:
+          - epel-release
+          - git
+          - nodejs
+          - mongodb-server
+          - mongodb-2.6.12-6.el7.x86_64
+          - nginx
+        state: latest
+    - name: copying the "mongodb_ACIT4640.tgz" file into machine
       copy:
         src: files/mongodb_ACIT4640.tgz
         dest: /home/{{ admin_user_name }}/mongodb_ACIT4640.tgz
         owner: "{{ admin_user_name }}"
         mode: "0755"
-    - name: Install epel-release
-      become: yes
-      package:
-        name: epel-release
-        state: installed
     - name: Add the user 'todoapp'
       become: yes
       user:
@@ -48,21 +36,6 @@
       file:
         path: /home/{{ todoapp_user_name }}
         mode: '0755'
-    - name: Install git
-      become: yes
-      package:
-        name: git
-        state: installed
-    - name: Install nodejs
-      become: yes
-      package:
-        name: nodejs
-        state: installed
-    - name: Install mongod-server
-      become: yes
-      package:
-        name: mongodb-server
-        state: installed
     - name: enable and start mongod
       become: yes
       systemd:
@@ -90,14 +63,13 @@
       file:
         path: /home/{{ todoapp_user_name }}/app/ACIT4640-todo-app/config/database.js
         state: absent
-    - name: Put new database.js into project config
+    - name: copy the "database.js" file into project config
       become: yes
-      command: mv /home/admin/database.js ~todoapp/app/ACIT4640-todo-app/config
-    - name: Install package for mongorestore command
-      become: yes
-      package:
-        name: mongodb-2.6.12-6.el7.x86_64
-        state: installed
+      copy:
+        src: files/database.js
+        dest: /home/{{ todoapp_user_name }}/app/ACIT4640-todo-app/config/database.js
+        owner: "{{ todoapp_user_name }}"
+        mode: "0755"
     - name: Extract mongodb_ACIT4640.tgz
       become: yes
       unarchive:
@@ -107,28 +79,31 @@
     - name: Import existing data to database
       become: yes
       command: mongorestore -d acit4640 /home/admin/ACIT4640
-    - name: Install nginx
-      become: yes
-      package:
-        name: nginx
-        state: installed
     - name: Remove existing nginx.conf file (delete file)
       become: yes
       file:
         path: /etc/nginx/nginx.conf
         state: absent
-    - name: Put new nginx.conf into directory
+    - name: copy the "nginx.conf" file into directory
       become: yes
-      command: mv /home/admin/nginx.conf /etc/nginx
+      copy:
+        src: files/nginx.conf
+        dest: /etc/nginx/nginx.conf
+        owner: "{{ todoapp_user_name }}"
+        mode: "0755"
     - name: enable and start nginx
       become: yes
       systemd:
         name: nginx
         state: started
         enabled: yes
-    - name: Put new todoapp.service into directory
+    - name: copy the "todoapp.service" file into directory
       become: yes
-      command: mv /home/admin/todoapp.service /etc/systemd/system
+      copy:
+        src: files/todoapp.service
+        dest: /etc/systemd/system/todoapp.service
+        owner: "{{ todoapp_user_name }}"
+        mode: "0755"
     - name: daemon-reload, enable and start todoapp.service
       become: yes
       systemd:
@@ -136,4 +111,3 @@
         state: started
         enabled: yes
         daemon_reload: yes
-
