@@ -3,8 +3,6 @@
   vars:
     admin_user_name: admin
     todoapp_user_name: todoapp
-    NODEJS_VERSION: "8"
-    ansible_distribution_release: "xenial" #trusty
   tasks:
     - name: Put SELinux in permissive mode, logging actions that would be blocked.
       become: yes
