@@ -1,0 +1,141 @@
+---
+- hosts: all
+  vars:
+    admin_user_name: admin
+    todoapp_user_name: todoapp
+    NODEJS_VERSION: "8"
+    ansible_distribution_release: "xenial" #trusty
+  tasks:
+    - name: Put SELinux in permissive mode, logging actions that would be blocked.
+      become: yes
+      selinux:
+        policy: targeted
+        state: permissive
+    - name: copy the "database.js" file
+      copy:
+        src: files/database.js
+        dest: /home/{{ admin_user_name }}/database.js
+        owner: "{{ admin_user_name }}"
+        mode: "0755"
+    - name: copy the "nginx.conf" file
+      copy:
+        src: files/nginx.conf
+        dest: /home/{{ admin_user_name }}/nginx.conf
+        owner: "{{ admin_user_name }}"
+        mode: "0755"
+    - name: copy the "todoapp.service" file
+      copy:
+        src: files/todoapp.service
+        dest: /home/{{ admin_user_name }}/todoapp.service
+        owner: "{{ admin_user_name }}"
+        mode: "0755"
+    - name: copy the "mongodb_ACIT4640.tgz" file
+      copy:
+        src: files/mongodb_ACIT4640.tgz
+        dest: /home/{{ admin_user_name }}/mongodb_ACIT4640.tgz
+        owner: "{{ admin_user_name }}"
+        mode: "0755"
+    - name: Install epel-release
+      become: yes
+      package:
+        name: epel-release
+        state: installed
+    - name: Add the user 'todoapp'
+      become: yes
+      user:
+        name: "{{ todoapp_user_name }}"
+        password: "P@ssw0rd"
+    - name: Change file ownership/permission for todoapp home
+      become: yes
+      file:
+        path: /home/{{ todoapp_user_name }}
+        mode: '0755'
+    - name: Install git
+      become: yes
+      package:
+        name: git
+        state: installed
+    - name: Install nodejs
+      become: yes
+      package:
+        name: nodejs
+        state: installed
+    - name: Install mongod-server
+      become: yes
+      package:
+        name: mongodb-server
+        state: installed
+    - name: enable and start mongod
+      become: yes
+      systemd:
+        name: mongod
+        state: started
+        enabled: yes
+    - name: Create app directory if it does not exist
+      become: yes
+      file:
+        path: /home/{{ todoapp_user_name }}/app
+        state: directory
+        mode: '0755'
+    - name: Git clone in app directory
+      become: yes
+      args:
+        chdir: /home/{{ todoapp_user_name }}/app/
+      command: git clone https://github.com/timoguic/ACIT4640-todo-app.git
+    - name: Update packages based on package.json to their latest version.
+      become: yes
+      npm:
+        path: /home/{{ todoapp_user_name }}/app/ACIT4640-todo-app
+        state: latest
+    - name: Remove existing database.js file (delete file)
+      become: yes
+      file:
+        path: /home/{{ todoapp_user_name }}/app/ACIT4640-todo-app/config/database.js
+        state: absent
+    - name: Put new database.js into project config
+      become: yes
+      command: mv /home/admin/database.js ~todoapp/app/ACIT4640-todo-app/config
+    - name: Install package for mongorestore command
+      become: yes
+      package:
+        name: mongodb-2.6.12-6.el7.x86_64
+        state: installed
+    - name: Extract mongodb_ACIT4640.tgz
+      become: yes
+      unarchive:
+        src: /home/admin/mongodb_ACIT4640.tgz
+        dest: /home/admin/
+        remote_src: yes
+    - name: Import existing data to database
+      become: yes
+      command: mongorestore -d acit4640 /home/admin/ACIT4640
+    - name: Install nginx
+      become: yes
+      package:
+        name: nginx
+        state: installed
+    - name: Remove existing nginx.conf file (delete file)
+      become: yes
+      file:
+        path: /etc/nginx/nginx.conf
+        state: absent
+    - name: Put new nginx.conf into directory
+      become: yes
+      command: mv /home/admin/nginx.conf /etc/nginx
+    - name: enable and start nginx
+      become: yes
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+    - name: Put new todoapp.service into directory
+      become: yes
+      command: mv /home/admin/todoapp.service /etc/systemd/system
+    - name: daemon-reload, enable and start todoapp.service
+      become: yes
+      systemd:
+        name: todoapp.service
+        state: started
+        enabled: yes
+        daemon_reload: yes
+

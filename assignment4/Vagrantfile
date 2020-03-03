@@ -1,5 +1,5 @@
 Vagrant.configure("2") do |config|
-  config.vm.box = "basebox_4640"
+  config.vm.box = "base_4640"
 
   config.ssh.username = "admin"
   config.ssh.private_key_path = "./files/acit_admin_id_rsa"
@@ -8,59 +8,14 @@ Vagrant.configure("2") do |config|
     todoapp.vm.hostname = "todoapp.bcit.local"
     todoapp.vm.network "forwarded_port", guest: 80, host: 12080
     todoapp.vm.synced_folder ".", "/vagrant", disabled: true
-    todoapp.vm.provision "file", source: "./files/database.js", destination: "/home/admin/database.js"
-    todoapp.vm.provision "file", source: "./files/nginx.conf", destination: "/home/admin/nginx.conf"
-    todoapp.vm.provision "file", source: "./files/todoapp.service", destination: "/home/admin/todoapp.service"
-    todoapp.vm.provision "file", source: "./files/mongodb_ACIT4640.tgz", destination: "/home/admin/mongodb_ACIT4640.tgz"
-#    todoapp.vm.provision "shell" do |shell|
-#      shell.path = "todoapp_vagrant.sh"
-
-  todoapp.vm.provision "shell", inline: <<-SHELL
-    setenforce 0
-    sudo yum -y install epel-release
-    sudo adduser todoapp
-    echo todoapp:P@ssw0rd | sudo chpasswd
-    sudo chmod 755 /home/todoapp
-    sudo yum install git -y
-    curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -
-    sudo yum install nodejs -y
-    sudo yum install mongodb-server -y
-    sudo systemctl enable mongod
-    sudo systemctl start mongod
-    cd ~todoapp/
-    sudo mkdir app
-    cd ~todoapp/app/
-    sudo git clone https://github.com/timoguic/ACIT4640-todo-app.git
-    cd ~todoapp/app/ACIT4640-todo-app/
-    sudo npm install
-    cd ~todoapp/app/ACIT4640-todo-app/config
-    sudo rm database.js
-    sudo mv /home/admin/database.js ~todoapp/app/ACIT4640-todo-app/config
-    sudo yum install -y mongodb-2.6.12-6.el7.x86_64
-    cd /home/admin/
-    tar zxf mongodb_ACIT4640.tgz
-    export LANG=C
-    mongorestore -d acit4640 /home/admin/ACIT4640
-    sudo yum install nginx -y
-    sudo systemctl enable nginx
-    sudo systemctl start nginx
-    sudo rm /etc/nginx/nginx.conf
-    sudo mv /home/admin/nginx.conf /etc/nginx
-    sudo yum install psmisc -y
-    sudo fuser -k 80/tcp
-    sudo systemctl restart nginx
-    sudo mv /home/admin/todoapp.service /etc/systemd/system
-    sudo systemctl daemon-reload
-    sudo systemctl enable todoapp.service
-    sudo systemctl start todoapp.service
-  SHELL
+    config.vm.provision :ansible do |ansible|
+        ansible.playbook = "todoapp.yml"
+        ansible.compatibility_mode = "2.0"
+     end
 
     todoapp.vm.provider "virtualbox" do |vb|
       vb.name = "TODO_4640"
       vb.linked_clone = true
     end
   end
-
-
-
 end

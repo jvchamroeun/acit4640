@@ -22,10 +22,10 @@
       "shutdown_command": "{{ user `shutdown_command` }}",
       "ssh_username": "{{ user `admin_user` }}",
       "ssh_password": "{{ user `admin_passwd` }}",
-      "ssh_timeout": "30m",
+      "ssh_timeout": "20m",
       "ssh_pty": "true",
       "boot_command": [
-          "<up><wait><tab><wait> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+        "<up><wait><tab><wait> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
       ],
       "format": "ova",
       "guest_os_type": "RedHat_64",
@@ -35,12 +35,12 @@
       "hard_drive_discard": true,
       "memory": "1536",
       "vboxmanage": [
-          [
-              "modifyvm",
-              "{{.Name}}",
-              "--nictype1",
-              "virtio"
-          ]
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--nictype1",
+          "virtio"
+        ]
       ]
     }
   ],
@@ -48,19 +48,21 @@
     {
       "type": "shell",
       "inline": [
-        "sudo yum -y install epel-release",
-        "sudo mkdir ~{{ user `admin_user`}}/.ssh",
-        "sudo touch ~/.ssh/authorized_keys",
-        "sudo chmod 700 /home/{{ user `admin_user`}}/.ssh",
-        "sudo chown admin /home/{{ user `admin_user`}}/.ssh",
-        "sudo chmod 600 /home/{{ user `admin_user`}}/.ssh/authorized_keys",
-        "sudo chown admin /home/{{ user `admin_user`}}/.ssh/authorized_keys"
+        "mkdir ~{{ user `admin_user`}}/.ssh"
       ]
     },
     {
       "type": "file",
       "source": "{{ user `pub_key_file` }}",
       "destination": "/home/{{ user `admin_user` }}/.ssh/authorized_keys"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "chown -R admin:admin /home/admin/.ssh",
+        "chmod 700 /home/admin/.ssh",
+        "chmod 600 /home/admin/.ssh/authorized_keys"
+      ]
     }
   ],
   "post-processors": [
