@@ -1,0 +1,13 @@
+---
+- name: Enable and start mongod
+  systemd:
+    name: mongod
+    state: started
+    enabled: yes
+- name: Extracting mongodb_ACIT4640.tgz
+  unarchive:
+    src: /home/admin/mongodb_ACIT4640.tgz
+    dest: /home/admin/
+    remote_src: yes
+- name: Importing new data to database
+  command: mongorestore -d acit4640 /home/admin/ACIT4640

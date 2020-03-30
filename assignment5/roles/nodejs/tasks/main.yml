@@ -1,0 +1,9 @@
+---
+- name: Installing Nodejs
+  package:
+    name: nodejs
+    state: present
+- name: Updating packages based on package.json to their latest version.
+  npm:
+    path: /home/{{ todoapp_user_name }}/app/{{ git_repo }}
+    state: latest

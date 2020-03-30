@@ -1,0 +1,24 @@
+---
+- name: Install required packages for MongoDB Server
+  package:
+    name:
+      - mongodb-server
+      - mongodb-2.6.12-6.el7.x86_64
+    state: latest
+  notify:
+    - Enable and start mongod
+    - Extracting mongodb_ACIT4640.tgz
+    - Importing new data to database
+- name: copying the "mongodb_ACIT4640.tgz" file into machine
+  copy:
+    src: files/mongodb_ACIT4640.tgz
+    dest: /home/{{ admin_user_name }}/mongodb_ACIT4640.tgz
+    owner: "{{ admin_user_name }}"
+    mode: "0755"
+- name: Templating database.j2 to application database
+  template:
+    src: database.j2
+    dest: /home/{{ todoapp_user_name }}/app/{{ git_repo }}/config/database.js
+    owner: "{{ todoapp_user_name }}"
+    mode: "0755"
+

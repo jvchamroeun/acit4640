@@ -1,0 +1,35 @@
+---
+- name: Install required packages for todoapp
+  package:
+    name:
+      - epel-release
+      - git
+    state: latest
+- name: Add the user 'todoapp'
+  become: yes
+  user:
+    name: "{{ todoapp_user_name }}"
+    password: "P@ssw0rd"
+- name: Change file ownership/permission for todoapp home
+  file:
+    path: /home/{{ todoapp_user_name }}
+    mode: '0755'
+- name: Create app directory if it does not exist
+  file:
+    path: /home/{{ todoapp_user_name }}/app
+    state: directory
+    mode: '0755'
+- name: Check if ACIT4640-todo-app does not exist for cloning
+  stat:
+    path: /home/{{ todoapp_user_name }}/app/{{ git_repo }}
+  register: details
+- name: Does not exist - Attempting to Git clone in app directory
+  become: yes
+  args:
+    chdir: /home/{{ todoapp_user_name }}/app/
+  command: git clone https://github.com/timoguic/{{ git_repo }}.git
+  when: not details.stat.exists
+- include_role:
+    name:  todoapp_service
+  vars:
+    todoapp_port: 8080

@@ -1,0 +1,11 @@
+---
+dependencies:
+  - role: nodejs
+  - role: mongodb
+    vars:
+      mongo_hostname: localhost
+      mongodb_instance: acit4640
+  - role: nginx
+    vars:
+      todoapp_port: 8080
+      todoapp_path: /home/todoapp/app/ACIT4640-todo-app

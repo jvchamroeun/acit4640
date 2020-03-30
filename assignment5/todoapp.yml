@@ -1,0 +1,12 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - include_role:
+        name:  base_system
+    - include_role:
+        name: todoapp
+      vars:
+        admin_user_name: admin
+        todoapp_user_name: todoapp
+        git_repo: ACIT4640-todo-app
