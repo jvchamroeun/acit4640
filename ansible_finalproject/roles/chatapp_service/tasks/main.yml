@@ -1,0 +1,21 @@
+---
+- name: Check if chatapp.service is registered in systemd
+  stat:
+    path: /etc/systemd/system/chatapp.service
+  register: file_details
+  tags:
+    - deploy
+- name: Templating chatapp_service.j2 to register chatapp service
+  template:
+    src: chatapp_service.j2
+    dest: /etc/systemd/system/chatapp.service
+    owner: "{{ app_user_name }}"
+    mode: "0755"
+  tags:
+    - deploy
+  when: not file_details.stat.exists
+-  name: Trigger Daemon-reload, Restart chatapp.service
+   command: /bin/true
+   notify: Daemon-reload, Restart chatapp.service
+   tags:
+    - deploy

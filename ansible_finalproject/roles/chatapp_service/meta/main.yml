@@ -1,0 +1,12 @@
+---
+dependencies:
+  - role: nodejs
+  - role: mongodb
+    vars:
+      mongo_hostname: localhost
+      mongodb_instance: chat
+      admin_user_name: centos
+  - role: nginx
+    vars:
+      app_port: 5000
+      app_path: /home/chatapp/app/anonymouse-realtime-chat-app

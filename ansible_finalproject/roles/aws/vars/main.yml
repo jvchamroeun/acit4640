@@ -1,0 +1,22 @@
+---
+#Global
+aws_region: us-west-2
+vpc_prefix: ACIT4640
+
+#VPC
+vpc_cidr: 10.46.0.0/16
+
+#subnet
+aws_az: us-west-2a
+vpc_subnet_cidr: 10.46.10.0/24
+
+#security group
+secgroup_desc: port 22 and port 80 access
+secgroup_ssh_allowed_instructor_cidr: 0.0.0.0/0
+
+#ec2 instance
+ami_id: ami-01ed306a12b7d1c96
+ec2_instance_name: ACIT4640_APP
+ec2_instance_type: t2.micro
+aws_key_name: ACIT4640_key 
+

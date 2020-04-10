@@ -1,0 +1,59 @@
+---
+- name: EC2 instance
+  ec2: 
+    region: "{{ aws_region }}"
+    image: "{{ ami_id }}"
+    exact_count: 1
+    count_tag:
+      Name: "{{ ec2_instance_name }}"
+    instance_type: "{{ ec2_instance_type }}"
+    instance_tags:
+      Name: "{{ ec2_instance_name }}"
+    key_name: "{{ aws_key_name }}"
+    vpc_subnet_id: "{{ subnet_data.subnet.id }}"
+    group_id: "{{ secgroup_data.group_id }}"
+    volumes:
+      - device_name: /dev/sda1
+        delete_on_termination: true
+        volume_size: 8
+    wait: true
+  tags:
+    - provision
+  register: ec2_data
+- name: gathering instance information
+  ec2_instance_facts:
+    region: "{{ aws_region }}"
+    filters:
+     "tag:Name": "{{ ec2_instance_name }}"
+     instance-state-name: running
+  tags:
+    - provision
+  register: ec2_facts
+- name: Elastic IP
+  ec2_eip:
+    state: present
+    region: "{{ aws_region }}"
+    in_vpc: true
+    reuse_existing_ip_allowed: "yes"
+    release_on_disassociation: "yes"
+    device_id: "{{ ec2_data.tagged_instances[0].id }}"
+  tags:
+    - provision
+  register: eip_data
+- name: Output Elastic IP
+  debug: 
+    msg: "Elastic IP created: {{ eip_data.public_ip }}"
+  tags:
+    - provision
+- name: first time setup - refresh inventory
+  meta: refresh_inventory
+  tags:
+    - provision
+  when: ec2_facts.instances[0].network_interfaces[0].association is undefined    
+- name: "first time setup - wait for system to become reachable over AWS"
+  wait_for_connection:
+    delay: 60
+    timeout: 300
+  tags:
+    - provision
+  when: ec2_facts.instances[0].network_interfaces[0].association is undefined    

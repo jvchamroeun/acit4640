@@ -1,0 +1,43 @@
+---
+- hosts: localhost
+  gather_facts: false
+  connection: local
+  tasks:
+    - include_role:
+        name: aws
+      tags:
+        - provision
+    - import_role:
+        name: aws
+        tasks_from: info
+      tags:
+        - info
+        - never
+    - import_role:
+        name: aws
+        tasks_from: cleanup
+      tags:
+        - cleanup
+        - never
+- hosts: aws_ec2
+  gather_facts: false
+  become: yes
+  tasks:
+    - include_role:
+        name: base_system
+      tags:
+        - deploy
+    - include_role:
+        name: chatapp
+      vars:
+        admin_user_name: centos
+        app_user_name: chatapp
+        git_repo: anonymouse-realtime-chat-app
+      tags:
+        - deploy
+    - import_role:
+        name: chatapp
+        tasks_from: info
+      tags:
+        - info
+        - never

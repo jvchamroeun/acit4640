@@ -1,0 +1,49 @@
+---
+- name: Install required packages for chatapp
+  package:
+    name:
+      - epel-release
+      - git
+    state: latest
+  tags:
+    - deploy
+- name: Add the user 'chatapp'
+  become: yes
+  user:
+    name: "{{ app_user_name }}"
+    password: "P@ssw0rd"
+  tags:
+    - deploy
+- name: Change file ownership/permission for chatapp home
+  file:
+    path: /home/{{ app_user_name }}
+    mode: '0755'
+  tags:
+    - deploy
+- name: Create app directory if it does not exist
+  file:
+    path: /home/{{ app_user_name }}/app
+    state: directory
+    mode: '0755'
+  tags:
+    - deploy
+- name: Check if Git application folder does not exist for cloning
+  stat:
+    path: /home/{{ app_user_name }}/app/{{ git_repo }}
+  tags:
+    - deploy
+  register: details
+- name: Attempting to Git clone in app directory (skip if exist)
+  become: yes
+  args:
+    chdir: /home/{{ app_user_name }}/app/
+  command: git clone https://github.com/ezesundayeze/{{ git_repo }}.git
+  tags:
+    - deploy
+  when: not details.stat.exists
+- include_role:
+    name:  chatapp_service
+  vars:
+    app_port: 5000
+  tags:
+    - deploy

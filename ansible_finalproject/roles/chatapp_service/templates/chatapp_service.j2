@@ -1,0 +1,14 @@
+[Unit]
+Description=Chat App, ACIT4640
+After=network.target
+
+[Service]
+Environment=NODE_PORT={{app_port}}
+WorkingDirectory=/home/chatapp/app/anonymouse-realtime-chat-app
+Type=simple
+User=chatapp
+ExecStart=/usr/bin/node /home/chatapp/app/anonymouse-realtime-chat-app/app.js
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

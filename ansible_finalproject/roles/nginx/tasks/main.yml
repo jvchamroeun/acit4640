@@ -1,0 +1,16 @@
+---
+- name: Installing nginx
+  package:
+    name: nginx
+    state: present
+  tags:
+    - deploy
+- name: Templating nginx.j2 to nginx service
+  template:
+    src: nginx.j2
+    dest: /etc/nginx/nginx.conf
+    owner: "{{ app_user_name }}"
+    mode: "0755"
+  notify: Enable and start nginx
+  tags:
+    - deploy

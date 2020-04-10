@@ -1,0 +1,8 @@
+---
+- name: Enable and start nginx
+  systemd:
+    name: nginx
+    state: restarted
+    enabled: yes
+  tags:
+    - deploy

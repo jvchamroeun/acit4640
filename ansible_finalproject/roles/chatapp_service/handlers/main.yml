@@ -1,0 +1,9 @@
+---
+- name: Daemon-reload, Restart chatapp.service
+  systemd:
+    name: chatapp.service
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+  tags: 
+    - deploy
